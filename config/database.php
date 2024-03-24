@@ -39,6 +39,21 @@ return [
             'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
         ],
 
+        'mongodb' => [
+            'driver' => 'mongodb',
+            'dsn' => env('MONGO_DB_DSN', sprintf('mongodb://%s:%s@%s:%s/%s',
+                env('MONGO_DB_USERNAME', 'root'),
+                env('MONGO_DB_PASSWORD', 'laravel'),
+                env('MONGO_DB_HOST', 'localhost'),
+                env('MONGO_DB_PORT', '27017'),
+                env('MONGO_DB_DATABASE', 'laravel')
+            )),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'options' => [
+                'database' => env('DB_AUTHENTICATION_DATABASE', 'admin'),
+            ],
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
