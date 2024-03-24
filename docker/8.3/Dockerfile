@@ -53,6 +53,8 @@ RUN apt-get update \
 RUN yes '' | pecl install mongodb
 COPY mongodb.ini /etc/php/8.3/cli/conf.d/20-mongodb.ini
 
+RUN pecl install redis
+
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.3
 
 RUN groupadd --force -g $WWWGROUP sail
