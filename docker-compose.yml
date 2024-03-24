@@ -32,15 +32,15 @@ services:
         ports:
             - '${FORWARD_DB_PORT:-27017}:27017'
         environment:
-            MONGO_INITDB_ROOT_USERNAME: '${DB_USERNAME}'
-            MONGO_INITDB_ROOT_PASSWORD: '${DB_PASSWORD}'
-            MONGO_INITDB_DATABASE: '${DB_DATABASE}'
+            MONGO_INITDB_ROOT_USERNAME: '${MONGO_DB_USERNAME}'
+            MONGO_INITDB_ROOT_PASSWORD: '${MONGO_DB_PASSWORD}'
+            MONGO_INITDB_DATABASE: '${MONGO_DB_DATABASE}'
         volumes:
             - 'sail-mongo:/data/db'
         networks:
             - sail
         healthcheck:
-            test: echo 'db.runCommand("ping")' | mongo ${DB_DATABASE} --username ${DB_USERNAME} --password ${DB_PASSWORD} --quiet
+            test: echo 'db.runCommand("ping")' | mongo ${MONGO_DB_DATABASE} --username ${MONGO_DB_USERNAME} --password ${MONGO_DB_PASSWORD} --quiet
             retries: 3
             timeout: 5s
     mysql:

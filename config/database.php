@@ -50,7 +50,7 @@ return [
             )),
             'database' => env('DB_DATABASE', 'laravel'),
             'options' => [
-                'database' => env('DB_AUTHENTICATION_DATABASE', 'admin'),
+                'authSource' => 'admin',
             ],
         ],
 
