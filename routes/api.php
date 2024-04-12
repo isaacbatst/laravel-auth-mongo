@@ -17,15 +17,17 @@ Route::post('/whatsapp/send', function () {
     // $url = "https://api.z-api.io/instances/${}/sendText";
     // use template literals
     $baseUrl = config('app.zapi.url');
-    $url = "{$baseUrl}/sent-text";
+    $url = "{$baseUrl}/send-text";
+    $clientToken = config('app.zapi.client_token');
+    $phone = config('app.zapi.phone_to_send');
 
     // client token is Client-Token header
 
-    // $zapiResponse = Http::withHeader('Client-Token', $zApiClientToken)
-    //     ->post($url, [
-    //         'phone' => '5584988300053',
-    //         'message' => 'Hello, world!'
-    //     ]);
+    $zapiResponse = Http::withHeader('Client-Token', $clientToken)
+        ->post($url, [
+            'phone' => $phone,
+            'message' => 'Hello, world!'
+        ]);
 
     // log response
     // log title with timestamp
@@ -35,7 +37,7 @@ Route::post('/whatsapp/send', function () {
 
     return response()->json([
         'url' => $url,
-        // 'response' => $zapiResponse->json(),
-        // 'status' => $zapiResponse->status()
+        'response' => $zapiResponse->json(),
+        'status' => $zapiResponse->status()
     ]);
 });

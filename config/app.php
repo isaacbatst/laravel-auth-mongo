@@ -2,7 +2,6 @@
 
 $zApiInstanceId = env('Z_API_INSTANCE_ID');
 $zApiToken = env('Z_API_TOKEN');
-$zApiClientToken = env('Z_API_CLIENT_TOKEN');
 $url = "https://api.z-api.io/instances/{$zApiInstanceId}/token/{$zApiToken}";
 
 return [
@@ -130,6 +129,7 @@ return [
 
     'zapi' => [
         'url' => $url,
-        'client_token' => $zApiClientToken,
+        'client_token' => env('Z_API_CLIENT_TOKEN'),
+        'phone_to_send' => env('Z_API_PHONE_TO_SEND'),
     ]
 ];
