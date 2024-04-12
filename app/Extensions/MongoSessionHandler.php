@@ -58,14 +58,7 @@ class MongoSessionHandler implements SessionHandlerInterface
   {
     $expired = now()->subSeconds($max_lifetime);
 
-    Log::info('Garbage collection is running...', ['max_lifetime' => $max_lifetime, 'expired' => $expired->timestamp, 'now' => now()->timestamp]);
-
-    $getAll = $this->collection->get();
-    Log::info('Garbage collection is running...', ['all' => $getAll]);
-    $getAllExpired = $this->collection->where('last_activity', '<', $expired->timestamp)->get();
-    Log::info('Garbage collection is running...', ['expired' => $getAllExpired]);
-    $count = $this->collection->where('last_activity', '<', $expired->timestamp)->delete();
-    Log::info('Garbage collection is done.', ['deleteCount' => $count]);
+    $this->collection->where('last_activity', '<', $expired->timestamp)->delete();
 
     return true;
   }
