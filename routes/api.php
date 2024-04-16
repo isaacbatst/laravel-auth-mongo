@@ -42,22 +42,4 @@ Route::post('/whatsapp/send', function () {
     ]);
 });
 
-Route::post('/whatsapp/receive', function (Request $request) {
-    $body = $request->all();
-
-    Log::info('Received message from Z-API: ' . now());
-    Log::info($body);
-
-    if (!isset($body['text'])) {
-        // return empty with 200
-        return response()->json([]);
-    }
-
-    $data = [
-        'phone' => $body['phone'],
-        'message' => $body['text']['message']
-    ];
-
-
-    return response()->json($data);
-});
+Route::post('/whatsapp/receive', [App\Http\Controllers\WhatsappController::class, 'receive']);
