@@ -77,7 +77,7 @@ class WhatsappController extends Controller
             }
 
             if($received['text'] === '2') {
-                $contact->step = 'show_map';
+                $contact->step = 'menu';
                 $contact->save();
                 $reply = "Aqui está o mapa com os locais de foco de zoonoses";
                 $this->saveTextMessage($reply, $connectedPhone, $contact);
@@ -119,18 +119,6 @@ class WhatsappController extends Controller
             ]);
         }
 
-        if($contact->step === 'show_map') {
-            $contact->step = 'menu';
-            $contact->save();
-            $reply = "Obrigado por visualizar o mapa!";
-            $this->saveTextMessage($reply, $connectedPhone, $contact);
-            $response = $this->sendMessage($reply, $contact->phone);
-            return response()->json([
-                'response' => $response->json(),
-                'status' => $response->status()
-            ]);
-        }
-        
         $contact->step = "menu";        
         $contact->save();
 
