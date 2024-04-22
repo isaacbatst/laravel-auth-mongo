@@ -7,7 +7,7 @@ use MongoDB\Laravel\Relations\EmbedsMany;
 class Contact extends Model
 {
     protected $collection = 'contacts';
-    protected $fillable = ['name', 'phone', 'email'];
+    protected $fillable = ['name', 'phone', 'email', 'onboardingStep'];
 
     public function messages(): EmbedsMany
     {
