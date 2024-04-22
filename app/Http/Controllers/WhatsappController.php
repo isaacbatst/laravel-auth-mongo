@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class WhatsappController extends Controller
 {
@@ -22,26 +22,26 @@ class WhatsappController extends Controller
     public function receive(Request $request)
     {
         $body = $request->all();
-        Log::info("Received message: \"{$body['text']['message']}\" from {$body['phone']}");
-        if (!isset($body['text'])) {
-            return response()->json([]);
-        }
-
         $contact = Contact::firstOrCreate(
             ['phone' => $body['phone']],
         );
 
-        $this->saveMessage($body['text']['message'], $body['phone'], $contact);
+        $received = $this->toDomain($body);
+        
+        if(!isset($received)) {
+            return response()->json([]);
+        }
+        $contact->messages()->save($received);
         return $this->reply($contact, $body['connectedPhone']);
     }
 
     private function reply(Contact $contact, string $connectedPhone) {
         $received = $contact->messages->last();
         if ($contact->wasRecentlyCreated) {
-            $contact->onboardingStep = 'ask_name';
+            $contact->step = 'ask_name';
+            $contact->save();
             $reply = "Olá, qual o seu nome?";
-            $contact->save();
-            $this->saveMessage($reply, $connectedPhone, $contact);
+            $this->saveTextMessage($reply, $connectedPhone, $contact);
             $response = $this->sendMessage($reply, $contact->phone);
             return response()->json([
                 'response' => $response->json(),
@@ -49,12 +49,13 @@ class WhatsappController extends Controller
             ]);
         }
 
-        if ($contact->onboardingStep === 'ask_name') {
-            $contact->onboardingStep = "finish";
+        if ($contact->step === 'ask_name') {
             $contact->name = $received['text'];
+            $contact->step = "menu";
             $contact->save();
-            $reply = "Olá, {$contact->name}! Como posso te ajudar?";
-            $this->saveMessage($reply, $connectedPhone, $contact);
+
+            $reply = "Olá, {$contact->name}! O que você deseja?\n- 1 - Informar um novo foco de zoonoze\n- 2 - Ver mapa com locais de foco de zoonoses";
+            $this->saveTextMessage($reply, $connectedPhone, $contact);
             $response = $this->sendMessage($reply, $contact->phone);
             return response()->json([
                 'response' => $response->json(),
@@ -62,8 +63,79 @@ class WhatsappController extends Controller
             ]);
         }
 
-        $reply = "Olá {$contact->name}, como posso te ajudar?";
-        $this->saveMessage($reply, $connectedPhone, $contact);
+        if($contact->step === 'menu') {
+            if($received['text'] === '1') {
+                $contact->step = 'report_focus';
+                $contact->save();
+                $reply = "Informe o foco de zoonoze";
+                $this->saveTextMessage($reply, $connectedPhone, $contact);
+                $response = $this->sendMessage($reply, $contact->phone);
+                return response()->json([
+                    'response' => $response->json(),
+                    'status' => $response->status()
+                ]);
+            }
+
+            if($received['text'] === '2') {
+                $contact->step = 'show_map';
+                $contact->save();
+                $reply = "Aqui está o mapa com os locais de foco de zoonoses";
+                $this->saveTextMessage($reply, $connectedPhone, $contact);
+                $response = $this->sendMessage($reply, $contact->phone);
+                return response()->json([
+                    'response' => $response->json(),
+                    'status' => $response->status()
+                ]);
+            }
+
+            $reply = "Opção inválida. O que você deseja?\n- 1 - Informar um novo foco de zoonoze\n- 2 - Ver mapa com locais de foco de zoonoses";
+            $this->saveTextMessage($reply, $connectedPhone, $contact);
+            $response = $this->sendMessage($reply, $contact->phone);
+            return response()->json([
+                'response' => $response->json(),
+                'status' => $response->status()
+            ]);
+        }
+
+        if($contact->step === 'report_focus') {
+            if(!isset($received['location'])) {
+                $reply = "Por favor, envie a localização do foco de zoonoze";
+                $this->saveTextMessage($reply, $connectedPhone, $contact);
+                $response = $this->sendMessage($reply, $contact->phone);
+                return response()->json([
+                    'response' => $response->json(),
+                    'status' => $response->status()
+                ]);
+            }
+
+            $contact->step = 'menu';
+            $contact->save();
+            $reply = "Obrigado por informar o foco de zoonoze!";
+            $this->saveTextMessage($reply, $connectedPhone, $contact);
+            $response = $this->sendMessage($reply, $contact->phone);
+            return response()->json([
+                'response' => $response->json(),
+                'status' => $response->status()
+            ]);
+        }
+
+        if($contact->step === 'show_map') {
+            $contact->step = 'menu';
+            $contact->save();
+            $reply = "Obrigado por visualizar o mapa!";
+            $this->saveTextMessage($reply, $connectedPhone, $contact);
+            $response = $this->sendMessage($reply, $contact->phone);
+            return response()->json([
+                'response' => $response->json(),
+                'status' => $response->status()
+            ]);
+        }
+        
+        $contact->step = "menu";        
+        $contact->save();
+
+        $reply = "Olá, {$contact->name}! O que você deseja?\n- 1 - Informar um novo foco de zoonoze\n- 2 - Ver mapa com locais de foco de zoonoses";
+        $this->saveTextMessage($reply, $connectedPhone, $contact);
         $response = $this->sendMessage($reply, $contact->phone);
         return response()->json([
             'response' => $response->json(),
@@ -71,7 +143,27 @@ class WhatsappController extends Controller
         ]);
     }
 
-    private function saveMessage($text, $from, $contact)
+    private function toDomain($body): ?Message {
+        if(isset($body['location'])) {
+            $message = new Message();
+            $message->phone = $body['phone'];
+            $message->location = $body['location'];
+            $message->created_at = now();
+            return $message;
+        }
+
+        if(isset($body['text'])) {
+            $message = new Message();
+            $message->phone = $body['phone'];
+            $message->text = $body['text']['message'];
+            $message->created_at = now();
+            return $message;
+        }
+
+        return null;
+    }
+
+    private function saveTextMessage($text, $from, $contact)
     {
         $contact->messages()->create([
             'text' => $text,

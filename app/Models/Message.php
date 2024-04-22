@@ -5,6 +5,5 @@ use MongoDB\Laravel\Eloquent\Model;
 
 class Message extends Model
 {
-    protected $collection = 'messages';
-    protected $fillable = ['phone', 'text', 'created_at'];
+    protected $fillable = ['phone', 'text', 'location', 'created_at'];
 }
