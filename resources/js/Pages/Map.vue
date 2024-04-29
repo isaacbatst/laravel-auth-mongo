@@ -23,20 +23,20 @@ onMounted(() => {
 <template>
 
     <Head title="Welcome" />
-    <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50
-        h-screen flex flex-col   
+    <div class="tw-flex tw-flex-col tw-justify-center tw-selection:bg-[#FF2D20] tw-selection:text-white
+        tw-h-screen tw-w-screen
     ">
-        <header>
-            <div class="flex items-center justify-between bg-white dark:bg-black
-                p-4 shadow-md
-            ">
-                <h1 class="text-xl font-bold">Map</h1>
+        <nav class=" navbar navbar-expand-md text-light py-3" style="background: rgb(31,87,170);">
+            <div class="container"><a class="navbar-brand d-flex align-items-center" href="#"><span
+                        class="text-light"><strong>DengueAlert.com</strong></span></a><button data-bs-toggle="collapse"
+                    class="navbar-toggler" data-bs-target="#navcol-3"><span class="visually-hidden">Toggle
+                        navigation</span><span class="navbar-toggler-icon"></span></button>
+                <div class="collapse navbar-collapse" id="navcol-3">
+                    <ul class="navbar-nav mx-auto"></ul>
+                    <div><span>Mapa de focos de zoonozes</span></div>
+                </div>
             </div>
-        </header>
-        <main class="flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white
-            flex-1
-        ">
-                <div id="map" class="w-full h-full"></div>
-        </main>
+        </nav>
+        <main id="map" class="tw-flex-1 tw-w-full"> </main>
     </div>
 </template>

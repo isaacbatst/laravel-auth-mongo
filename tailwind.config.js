@@ -19,6 +19,6 @@ export default {
             },
         },
     },
-
+    prefix: 'tw-',
     plugins: [forms, typography],
 };
