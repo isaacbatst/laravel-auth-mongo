@@ -1,22 +1,64 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import { onMounted } from 'vue';
+import 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import 'leaflet.heat'
 
 defineProps({});
 
-function handleImageError() {
-    document.getElementById('screenshot-container')?.classList.add('!hidden');
-    document.getElementById('docs-card')?.classList.add('!row-span-1');
-    document.getElementById('docs-card-content')?.classList.add('!flex-row');
-    document.getElementById('background')?.classList.add('!hidden');
+function getRandomNormal(mean, stdDev) {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
+    while (v === 0) v = Math.random();
+    return mean + stdDev * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
 }
 
+// Generate 1000 random coordinates with normal distribution
+const nearNatal = Array.from({ length: 100 }, () => [
+    getRandomNormal(-5.745, 0.04),
+    getRandomNormal(-35.359, 0.04),
+    100
+]);
+
+const nearMossoro = Array.from({ length: 1000 }, () => [
+    getRandomNormal(-5.245, 0.05),
+    getRandomNormal(-37.359, 0.05),
+    100
+]);
+
+const data = [
+    ...nearNatal,
+    ...nearMossoro
+]
+
 onMounted(() => {
-    const map = L.map('map').setView([-8.211, -40.897], 7);
+    const defaultParams = {
+        lat: -8.211,
+        lng: -40.897,
+        zoom: 7
+    };
+    const params = new URLSearchParams(window.location.search);
+    const lat = params.get('lat') || defaultParams.lat;
+    const lng = params.get('lng') || defaultParams.lng;
+    const zoom = params.get('zoom') || defaultParams.zoom;
+    const map = L.map('map').setView([lat, lng], zoom);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map);
+    L.heatLayer(data, { 
+        radius: 12,
+        max: 100,
+        minOpacity: 0.5,
+    }).addTo(map);
+    map.on("move", function() {
+        const params = new URLSearchParams(window.location.search);
+        params.set('lat', map.getCenter().lat);
+        params.set('lng', map.getCenter().lng);
+        params.set('zoom', map.getZoom());
+        window.history.replaceState({}, '', `${window.location.pathname}?${params}`);
+    });
 })
 </script>
 
