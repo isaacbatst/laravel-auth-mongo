@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Http;
 
 class WhatsappController extends Controller
 {
+    static $menu = "- 1 - Informar um novo foco de zoonoze\n- 2 - Ver mapa com locais de foco de zoonoses";
+
     public function sendTest()
     {
         $to = config('app.zapi.phone_to_send');
@@ -54,7 +56,7 @@ class WhatsappController extends Controller
             $contact->step = "menu";
             $contact->save();
 
-            $reply = "Olá, {$contact->name}! O que você deseja?\n- 1 - Informar um novo foco de zoonoze\n- 2 - Ver mapa com locais de foco de zoonoses";
+            $reply = "Olá, {$contact->name}! O que você deseja?\n{$this::$menu}";
             $this->saveTextMessage($reply, $connectedPhone, $contact);
             $response = $this->sendMessage($reply, $contact->phone);
             return response()->json([
@@ -88,7 +90,7 @@ class WhatsappController extends Controller
                 ]);
             }
 
-            $reply = "Opção inválida. O que você deseja?\n- 1 - Informar um novo foco de zoonoze\n- 2 - Ver mapa com locais de foco de zoonoses";
+            $reply = "Opção inválida. O que você deseja?\n{$this::$menu}";
             $this->saveTextMessage($reply, $connectedPhone, $contact);
             $response = $this->sendMessage($reply, $contact->phone);
             return response()->json([
@@ -110,7 +112,7 @@ class WhatsappController extends Controller
 
             $contact->step = 'menu';
             $contact->save();
-            $reply = "Obrigado por informar o foco de zoonoze!";
+            $reply = "Obrigado por informar o foco de zoonoze!\n{$this::$menu}";
             $this->saveTextMessage($reply, $connectedPhone, $contact);
             $response = $this->sendMessage($reply, $contact->phone);
             return response()->json([
@@ -122,7 +124,7 @@ class WhatsappController extends Controller
         $contact->step = "menu";        
         $contact->save();
 
-        $reply = "Olá, {$contact->name}! O que você deseja?\n- 1 - Informar um novo foco de zoonoze\n- 2 - Ver mapa com locais de foco de zoonoses";
+        $reply = "Olá, {$contact->name}! O que você deseja?\n{$this::$menu}";
         $this->saveTextMessage($reply, $connectedPhone, $contact);
         $response = $this->sendMessage($reply, $contact->phone);
         return response()->json([
