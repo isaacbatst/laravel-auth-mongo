@@ -13,6 +13,10 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/mapa', function () {
+    return Inertia::render('Map');
+})->name('mapa');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
