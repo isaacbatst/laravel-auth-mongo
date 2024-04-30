@@ -33,23 +33,26 @@ class MongoSessionHandler implements SessionHandlerInterface
 
   public function read(string $id): string
   {
-    $session = $this->collection->where('_id', $id)->first();
+    $session = $this->collection->where('sid', $id)->first();
 
     return $session ? $session['payload'] : '';
   }
 
   public function write(string $id, string $data): bool
   {
-    $this->collection->updateOrInsert(
-      ['_id' => $id],
-      ['payload' => $data, 'last_activity' => now()->timestamp]);
 
+    $session = $this->collection->where('sid', $id);
+    if(isset($session)) {
+      $session->update(['payload' => $data, 'last_activity' => now()->timestamp]);
+    } else {
+      $this->collection->insert(['sid' => $id, 'payload' => $data, 'last_activity' => now()->timestamp]);
+    }
     return true;
   }
 
   public function destroy(string $id): bool
   {
-    $this->collection->where('_id', $id)->delete();
+    $this->collection->where('sid', $id)->delete();
 
     return true;
   }
