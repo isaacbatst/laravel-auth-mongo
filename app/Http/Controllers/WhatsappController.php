@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Models\Location;
 use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -32,6 +33,14 @@ class WhatsappController extends Controller
         
         if(!isset($received)) {
             return response()->json([]);
+        }
+
+        if($contact->step === 'report_focus' && isset($received->location)) {
+            Location::create([
+                'lat' => $received['location']['lat'],
+                'lng' => $received['location']['lng'],
+                'created_at' => now()
+            ]);
         }
         $contact->messages()->save($received);
         return $this->reply($contact, $body['connectedPhone']);
@@ -137,7 +146,10 @@ class WhatsappController extends Controller
         if(isset($body['location'])) {
             $message = new Message();
             $message->phone = $body['phone'];
-            $message->location = $body['location'];
+            $message->location = [
+                'lat' => $body['location']['latitude'],
+                'lng' => $body['location']['longitude']
+            ];
             $message->created_at = now();
             return $message;
         }

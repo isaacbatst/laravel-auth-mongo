@@ -5,7 +5,12 @@ import 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import 'leaflet.heat'
 
-defineProps({});
+const props = defineProps({
+    locations: {
+        type: Array,
+        required: true
+    }
+});
 
 function getRandomNormal(mean, stdDev) {
     let u = 0, v = 0;
@@ -27,10 +32,16 @@ const nearMossoro = Array.from({ length: 1000 }, () => [
     100
 ]);
 
-const data = [
-    ...nearNatal,
-    ...nearMossoro
-]
+// const data = [
+//     ...nearNatal,
+//     ...nearMossoro
+// ]
+
+const data = props.locations.map(location => [
+    location.lat,
+    location.lng,
+    100
+]);
 
 onMounted(() => {
     const defaultParams = {
