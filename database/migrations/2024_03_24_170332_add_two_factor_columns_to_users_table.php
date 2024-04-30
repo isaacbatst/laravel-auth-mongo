@@ -14,17 +14,20 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->text('two_factor_secret')
-                ->after('password')
-                ->nullable();
+                ->after('password', function (Blueprint $table) {
+                    $table->nullable();
+                });
 
             $table->text('two_factor_recovery_codes')
-                ->after('two_factor_secret')
-                ->nullable();
+                ->after('two_factor_secret', function (Blueprint $table) {
+                    $table->nullable();
+                });
 
             if (Fortify::confirmsTwoFactorAuthentication()) {
                 $table->timestamp('two_factor_confirmed_at')
-                    ->after('two_factor_recovery_codes')
-                    ->nullable();
+                    ->after('two_factor_recovery_codes', function (Blueprint $table) {
+                        $table->nullable();
+                    });
             }
         });
     }

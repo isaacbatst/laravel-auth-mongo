@@ -12,30 +12,12 @@ const props = defineProps({
     }
 });
 
-function getRandomNormal(mean, stdDev) {
-    let u = 0, v = 0;
-    while (u === 0) u = Math.random(); // Converting [0,1) to (0,1)
-    while (v === 0) v = Math.random();
-    return mean + stdDev * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
-}
-
-// Generate 1000 random coordinates with normal distribution
-const nearNatal = Array.from({ length: 100 }, () => [
-    getRandomNormal(-5.745, 0.04),
-    getRandomNormal(-35.359, 0.04),
-    100
-]);
-
-const nearMossoro = Array.from({ length: 1000 }, () => [
-    getRandomNormal(-5.245, 0.05),
-    getRandomNormal(-37.359, 0.05),
-    100
-]);
-
 // const data = [
 //     ...nearNatal,
 //     ...nearMossoro
 // ]
+
+console.log(props.locations)
 
 const data = props.locations.map(location => [
     location.lat,
