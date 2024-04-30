@@ -90,9 +90,10 @@ class WhatsappController extends Controller
             if($received['text'] === '2') {
                 $contact->step = 'menu';
                 $contact->save();
-                $reply = "Aqui está o mapa com os locais de foco de zoonoses";
+                $link = $this->getMapLink();
+                $reply = $this->getMapMessage($link);
                 $this->saveTextMessage($reply, $connectedPhone, $contact);
-                $response = $this->sendMessage($reply, $contact->phone);
+                $response = $this->sendMapLink($contact->phone, $reply, $link);
                 return response()->json([
                     'response' => $response->json(),
                     'status' => $response->status()
@@ -184,6 +185,50 @@ class WhatsappController extends Controller
             ->post($url, [
                 'phone' => $to,
                 'message' => $text,
+            ]);
+    }
+
+    private function getMapLink() {
+        return env('APP_URL') . '/mapa';
+    }
+
+    private function getMapMessage($link)
+    {
+        return "Aqui está o mapa com os locais de foco de zoonoses: {$link}";
+    }
+
+    private function sendMapLink(string $to, string $message, string $link)
+    {
+        $title = 'Mapa - Dengue Alert';
+        $description = 'Clique no link para ver o mapa com os locais de foco de zoonoses';
+        return $this->sendLink(
+            $link,
+            $message,
+            $to, 
+            $title, 
+            $description
+        );
+    }
+
+    private function sendLink(
+        string $link, 
+        string $message, 
+        string $to, 
+        string $title, 
+        string $description
+    )
+    {
+        $baseUrl = config('app.zapi.url');
+        $url = "{$baseUrl}/send-link";
+        $clientToken = config('app.zapi.client_token');
+
+        return Http::withHeader('Client-Token', $clientToken)
+            ->post($url, [
+                'phone' => $to,
+                'message' => $message,
+                'linkUrl' => $link,
+                'title' => $title,
+                'linkDescription' => $description,
             ]);
     }
 }
